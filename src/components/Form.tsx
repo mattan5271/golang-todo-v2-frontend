@@ -5,6 +5,7 @@ import { useForm } from "@mantine/form";
 import { Todo } from "types";
 
 type Props = {
+  todo?: Todo;
   todos: Todo[];
   setTodos: Dispatch<SetStateAction<Todo[]>>;
   buttonText: string;
@@ -14,8 +15,8 @@ type Props = {
 export const Form: FC<Props> = (props) => {
   const form = useForm({
     initialValues: {
-      title: "",
-      description: "",
+      title: props.todo ? props.todo.title : "",
+      description: props.todo ? props.todo.description : "",
     },
 
     validate: {

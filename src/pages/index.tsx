@@ -60,7 +60,7 @@ const Home: NextPage = () => {
                   編集
                 </Button>
                 <Modal opened={opened} onClose={() => setOpened(false)} title="Todo更新" transitionDuration={300}>
-                  <Form todos={todos} setTodos={setTodos} buttonText="Todoを更新" buttonColor="green"></Form>
+                  <Form todo={todo} todos={todos} setTodos={setTodos} buttonText="Todoを更新" buttonColor="green"></Form>
                   <Group position="right">
                     <Button color="red" onClick={() => openedTodoId && handleDeleteTodo(openedTodoId)}>
                       削除
