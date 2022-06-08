@@ -1,16 +1,17 @@
 import { Dispatch, FC, SetStateAction } from "react";
 import axios, { AxiosError, AxiosResponse } from "axios";
-import { Button, Center, Container, Group, Modal, Table, Textarea, TextInput } from "@mantine/core";
+import { Button, Center, Textarea, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import { Todo } from "types";
 
 type Props = {
+  buttonText: string;
+  buttonColor: string;
   todo?: Todo;
   todos: Todo[];
   setTodos: Dispatch<SetStateAction<Todo[]>>;
-  buttonText: string;
-  buttonColor: string;
+  setOpened?: Dispatch<SetStateAction<boolean>>;
 };
 
 export const Form: FC<Props> = (props) => {
@@ -27,19 +28,36 @@ export const Form: FC<Props> = (props) => {
   type FormValues = typeof form.values;
 
   const handleSubmit = (formValues: FormValues): void => {
-    axios
-      .post(`${process.env.NEXT_PUBLIC_API_URL}/todos`, formValues)
-      .then((res: AxiosResponse) => {
-        props.setTodos([...props.todos, res.data]);
-        form.reset();
-        showNotification({
-          message: "Todoを作成しました",
-          color: "green",
+    if (props.todo) {
+      axios
+        .put(`${process.env.NEXT_PUBLIC_API_URL}/todos/${props.todo.id}`, formValues)
+        .then((res: AxiosResponse) => {
+          props.setTodos(props.todos.map((todo: Todo) => (todo.id === props.todo?.id ? res.data : todo)));
+          form.reset();
+          props.setOpened && props.setOpened(false);
+          showNotification({
+            message: "Todoを更新しました",
+            color: "green",
+          });
+        })
+        .catch((err: AxiosError<{ error: string }>) => {
+          console.log(err);
         });
-      })
-      .catch((err: AxiosError<{ error: string }>) => {
-        console.log(err);
-      });
+    } else {
+      axios
+        .post(`${process.env.NEXT_PUBLIC_API_URL}/todos`, formValues)
+        .then((res: AxiosResponse) => {
+          props.setTodos([...props.todos, res.data]);
+          form.reset();
+          showNotification({
+            message: "Todoを作成しました",
+            color: "green",
+          });
+        })
+        .catch((err: AxiosError<{ error: string }>) => {
+          console.log(err);
+        });
+    }
   };
 
   return (

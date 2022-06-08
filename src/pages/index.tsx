@@ -1,7 +1,7 @@
 import type { NextPage } from "next";
 import { useEffect, useState } from "react";
 import axios, { AxiosError, AxiosResponse } from "axios";
-import { Button, Center, Container, Group, Modal, Table, Textarea, TextInput } from "@mantine/core";
+import { Button, Container, Group, Modal, Table } from "@mantine/core";
 import { Todo } from "types";
 import { Form } from "components/Form";
 import { showNotification } from "@mantine/notifications";
@@ -9,14 +9,15 @@ import { showNotification } from "@mantine/notifications";
 const Home: NextPage = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [opened, setOpened] = useState<boolean>(false);
-  const [openedTodoId, setOpenedTodoId] = useState<number>();
+  const [openedTodo, setOpenedTodo] = useState<Todo>();
 
-  const clickEditButton = (id: number): void => {
+  const clickEditButton = (todo: Todo): void => {
     setOpened(true);
-    setOpenedTodoId(id);
+    setOpenedTodo(todo);
   };
 
   const handleDeleteTodo = (id: number): void => {
+    if (!confirm("本当に削除しますか？")) return;
     axios
       .delete(`${process.env.NEXT_PUBLIC_API_URL}/todos/${id}`)
       .then((res: AxiosResponse) => {
@@ -61,13 +62,13 @@ const Home: NextPage = () => {
               <td>{todo.title}</td>
               <td>{todo.description}</td>
               <td>
-                <Button color="green" onClick={() => clickEditButton(todo.id)}>
+                <Button color="green" onClick={() => clickEditButton(todo)}>
                   編集
                 </Button>
                 <Modal opened={opened} onClose={() => setOpened(false)} title="Todo更新" transitionDuration={300}>
-                  <Form todo={todo} todos={todos} setTodos={setTodos} buttonText="Todoを更新" buttonColor="green"></Form>
+                  <Form todos={todos} setTodos={setTodos} setOpened={setOpened} todo={openedTodo} buttonText="Todoを更新" buttonColor="green"></Form>
                   <Group position="right">
-                    <Button color="red" onClick={() => openedTodoId && handleDeleteTodo(openedTodoId)}>
+                    <Button color="red" onClick={() => openedTodo && handleDeleteTodo(openedTodo.id)}>
                       削除
                     </Button>
                   </Group>
