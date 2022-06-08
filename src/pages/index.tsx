@@ -4,6 +4,7 @@ import axios, { AxiosError, AxiosResponse } from "axios";
 import { Button, Center, Container, Group, Modal, Table, Textarea, TextInput } from "@mantine/core";
 import { Todo } from "types";
 import { Form } from "components/Form";
+import { showNotification } from "@mantine/notifications";
 
 const Home: NextPage = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -21,6 +22,10 @@ const Home: NextPage = () => {
       .then((res: AxiosResponse) => {
         setTodos(todos.filter((todo: Todo) => todo.id !== id));
         setOpened(false);
+        showNotification({
+          message: "Todoを削除しました",
+          color: "red",
+        });
       })
       .catch((err: AxiosError<{ error: string }>) => {
         console.log(err);

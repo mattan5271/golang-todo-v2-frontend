@@ -2,6 +2,7 @@ import { Dispatch, FC, SetStateAction } from "react";
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { Button, Center, Container, Group, Modal, Table, Textarea, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { showNotification } from "@mantine/notifications";
 import { Todo } from "types";
 
 type Props = {
@@ -31,6 +32,10 @@ export const Form: FC<Props> = (props) => {
       .then((res: AxiosResponse) => {
         props.setTodos([...props.todos, res.data]);
         form.reset();
+        showNotification({
+          message: "Todoを作成しました",
+          color: "green",
+        });
       })
       .catch((err: AxiosError<{ error: string }>) => {
         console.log(err);
