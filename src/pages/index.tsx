@@ -1,35 +1,26 @@
 import type { NextPage } from "next";
 import { useEffect, useState } from "react";
 import axios, { AxiosError, AxiosResponse } from "axios";
-
-import { Button, Center, Container, Table, Textarea, TextInput } from "@mantine/core";
-import { useForm } from "@mantine/form";
-
-export type Todo = {
-  id: number;
-  title: string;
-  description: string;
-};
+import { Button, Center, Container, Group, Modal, Table, Textarea, TextInput } from "@mantine/core";
+import { Todo } from "types";
+import { Form } from "components/Form";
 
 const Home: NextPage = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
-  const form = useForm({
-    initialValues: {
-      title: "",
-      description: "",
-    },
+  const [opened, setOpened] = useState<boolean>(false);
+  const [openedTodoId, setOpenedTodoId] = useState<number>();
 
-    validate: {
-      description: (value) => (value.length > 50 ? "説明文は50文字以内にしてください" : null),
-    },
-  });
-  type FormValues = typeof form.values;
+  const clickEditButton = (id: number): void => {
+    setOpened(true);
+    setOpenedTodoId(id);
+  };
 
-  const handleSubmit = (formValues: FormValues): void => {
+  const handleDeleteTodo = (id: number): void => {
     axios
-      .post(`${process.env.NEXT_PUBLIC_API_URL}/todos`, formValues)
+      .delete(`${process.env.NEXT_PUBLIC_API_URL}/todos/${id}`)
       .then((res: AxiosResponse) => {
-        console.log(res);
+        setTodos(todos.filter((todo: Todo) => todo.id !== id));
+        setOpened(false);
       })
       .catch((err: AxiosError<{ error: string }>) => {
         console.log(err);
@@ -49,21 +40,14 @@ const Home: NextPage = () => {
 
   return (
     <Container>
-      <form onSubmit={form.onSubmit((formValues: FormValues) => handleSubmit(formValues))}>
-        <TextInput required label="タイトル" {...form.getInputProps("title")} />
-        <Textarea label="説明文" description="50文字以下で入力してください" mt="md" {...form.getInputProps("description")} />
-        <Center my="md">
-          <Button type="submit" color="green">
-            Todoを登録
-          </Button>
-        </Center>
-      </form>
+      <Form todos={todos} setTodos={setTodos} buttonText="Todoを登録" buttonColor=""></Form>
 
-      <Table>
+      <Table verticalSpacing="md" highlightOnHover>
         <thead>
           <tr>
             <th>タイトル</th>
             <th>説明文</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -71,6 +55,19 @@ const Home: NextPage = () => {
             <tr key={todo.id}>
               <td>{todo.title}</td>
               <td>{todo.description}</td>
+              <td>
+                <Button color="green" onClick={() => clickEditButton(todo.id)}>
+                  編集
+                </Button>
+                <Modal opened={opened} onClose={() => setOpened(false)} title="Todo更新" transitionDuration={300}>
+                  <Form todos={todos} setTodos={setTodos} buttonText="Todoを更新" buttonColor="green"></Form>
+                  <Group position="right">
+                    <Button color="red" onClick={() => openedTodoId && handleDeleteTodo(openedTodoId)}>
+                      削除
+                    </Button>
+                  </Group>
+                </Modal>
+              </td>
             </tr>
           ))}
         </tbody>
